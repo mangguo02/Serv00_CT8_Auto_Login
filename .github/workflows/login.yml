@@ -44,6 +44,10 @@ jobs:
             chmod +x gost-linux-amd64-2.11.5
             ./gost-linux-amd64-2.11.5 -L=socks5://127.0.0.1:1080 -F=$SOCKS5_PROXY &
             sleep 3
+            
+            echo "--- 开始测试代理连通性 ---"
+            curl --max-time 10 --socks5-hostname 127.0.0.1:1080 -I https://panel.ct8.pl || echo "❌ 代理测试失败！你的 SOCKS5 节点无法连接目标网站！"
+            echo "--- 测试结束 ---"
           else
             echo "未设置 SOCKS5_PROXY，跳过代理转发"
           fi
