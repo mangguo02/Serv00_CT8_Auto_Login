@@ -24,20 +24,14 @@ logger = logging.getLogger(__name__)
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 
-
 def format_to_iso(dt: datetime):
     return dt.strftime('%Y-%m-%d %H:%M:%S')
-
 
 def send_telegram_message(message: str):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         logger.warning("⚠️ Telegram环境变量未设置，跳过通知")
         return False
-
-    formatted_message = f"""📨 Serv00 & CT8
-
-{message}
-"""
+    formatted_message = f"📨 Serv00 & CT8\n\n{message}\n"
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHAT_ID,
@@ -53,7 +47,6 @@ def send_telegram_message(message: str):
             logger.error(f"❌ 发送消息失败: {response.status_code} {response.text}")
     except Exception as e:
         logger.error(f"❌ 发送消息异常: {e}")
-
 
 # -------------------- 登录机器人 --------------------
 class Serv00LoginBot:
@@ -74,11 +67,10 @@ class Serv00LoginBot:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
 
-        # -------------------- 修改后的代理配置代码 --------------------
+        # -------------------- 代理配置代码 --------------------
         proxy_server = os.environ.get('SOCKS5_PROXY')
         if proxy_server:
             logger.info("🌐 检测到代理配置，正在连接本地 Gost 转发端口 127.0.0.1:1080 ...")
-            # 注意这里固定填本地端口，因为 Gost 已经在后台把带密码的代理转换好了
             chrome_options.add_argument('--proxy-server=socks5://127.0.0.1:1080')
         # ----------------------------------------------------------
 
@@ -97,6 +89,15 @@ class Serv00LoginBot:
         except Exception as e:
             logger.error(f"❌ 浏览器驱动设置失败: {e}")
             return False
+
+    def wait_for_element(self, by, value, timeout=15):
+        try:
+            return WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((by, value))
+            )
+        except TimeoutException:
+            logger.debug(f"元素定位超时: {by}={value}")
+            return None
 
     def wait_for_element_clickable(self, by, value, timeout=15):
         try:
@@ -154,7 +155,6 @@ class Serv00LoginBot:
                 'http://' + panel_value + '/login',
                 'http://' + panel_value + '/admin/login'
             ])
-        # 去重
         seen = set()
         unique = []
         for u in candidates:
@@ -297,7 +297,6 @@ class Serv00LoginBot:
                     logger.info(f"⏳ 等待 {wait_time} 秒后处理下一个账号...")
                     time.sleep(wait_time)
 
-            # 构造 Telegram 消息
             message_lines = []
             success_count = sum(1 for r in results if r['success'])
             for r in results:
@@ -307,7 +306,7 @@ class Serv00LoginBot:
                 message_lines.append(
                     f"🖥️ 服务商: {service_provider}\n👤 用户名: {r['name']}\n⏰ 时间: {format_to_iso(datetime.utcnow() + timedelta(hours=8))}\n{status_icon} 状态: {r['message']}\n"
                 )
-            success_rate = (success_count / len(results)) * 100
+            success_rate = (success_count / len(results)) * 100 if len(results) > 0 else 0
             message_lines.append(
                 f"📊 统计信息:\n✅ 成功: {success_count}/{len(results)}\n📈 成功率: {success_rate:.1f}%\n🏁 所有账号操作已完成"
             )
@@ -326,7 +325,6 @@ class Serv00LoginBot:
                     pass
                 logger.info("🚪 浏览器已关闭")
 
-
 # -------------------- 主函数 --------------------
 def main():
     logger.info("🚀 开始执行 Serv00 & CT8 自动登录脚本")
@@ -338,7 +336,6 @@ def main():
     else:
         logger.error("💥 脚本执行失败")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
