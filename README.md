@@ -49,7 +49,10 @@
     - 如果需要手动触发，可以在 Actions 页面手动运行工作流。
 
 #### 示例 Secrets 和获取方法总结
-
+- **SOCKS5_PROXY
+- 变量 指定节点 变量名称 SOCKS5_PROXY
+- 示例1：socks5://235ece07-ef7d-456f-8f0a-cfce031f078d:235ece07-ef7d-456f-8f0a-cfce031f078d@172.81.59.184:38383
+- 示例1：socks5://b16e2b92-d626-4f43-bf61-894f4d1edd48:b16e2b92-d626-4f43-bf61-894f4d1edd48@172.245.120.35:38382
 - **TELEGRAM_BOT_TOKEN**
     - 示例值: `1234567890:ABCDEFghijklmnopQRSTuvwxyZ`
     - 获取方法: 在 Telegram 中使用 `@BotFather` 创建 Bot 并获取 API Token。
