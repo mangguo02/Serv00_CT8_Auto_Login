@@ -74,6 +74,13 @@ class Serv00LoginBot:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
 
+        # -------------------- 新增代理配置代码 --------------------
+        proxy_server = os.environ.get('SOCKS5_PROXY')
+        if proxy_server:
+            logger.info("🌐 检测到代理配置，正在为浏览器设置 SOCKS5 代理...")
+            chrome_options.add_argument(f'--proxy-server={proxy_server}')
+        # ----------------------------------------------------------
+
         try:
             self.driver = webdriver.Chrome(options=chrome_options)
             try:
@@ -84,20 +91,11 @@ class Serv00LoginBot:
             except Exception:
                 pass
             self.wait = WebDriverWait(self.driver, 20)
-            logger.info("✅ 浏览器驱动设置完成 (headless=%s)", self.headless)
+            logger.info(f"✅ 浏览器驱动设置完成 (headless={self.headless}, proxy={bool(proxy_server)})")
             return True
         except Exception as e:
             logger.error(f"❌ 浏览器驱动设置失败: {e}")
             return False
-
-    def wait_for_element(self, by, value, timeout=15):
-        try:
-            return WebDriverWait(self.driver, timeout).until(
-                EC.presence_of_element_located((by, value))
-            )
-        except TimeoutException:
-            logger.debug(f"元素定位超时: {by}={value}")
-            return None
 
     def wait_for_element_clickable(self, by, value, timeout=15):
         try:
