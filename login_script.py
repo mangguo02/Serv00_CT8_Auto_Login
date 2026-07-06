@@ -74,11 +74,12 @@ class Serv00LoginBot:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
 
-        # -------------------- 新增代理配置代码 --------------------
+        # -------------------- 修改后的代理配置代码 --------------------
         proxy_server = os.environ.get('SOCKS5_PROXY')
         if proxy_server:
-            logger.info("🌐 检测到代理配置，正在为浏览器设置 SOCKS5 代理...")
-            chrome_options.add_argument(f'--proxy-server={proxy_server}')
+            logger.info("🌐 检测到代理配置，正在连接本地 Gost 转发端口 127.0.0.1:1080 ...")
+            # 注意这里固定填本地端口，因为 Gost 已经在后台把带密码的代理转换好了
+            chrome_options.add_argument('--proxy-server=socks5://127.0.0.1:1080')
         # ----------------------------------------------------------
 
         try:
