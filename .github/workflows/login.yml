@@ -32,6 +32,29 @@ jobs:
           sudo apt-get install -y curl unzip xvfb libnss3 fonts-liberation
           python -m pip install --upgrade pip
           pip install selenium requests webdriver-manager chromedriver-binary-auto
+      
+      - name: 设置代理转发 (Gost)
+        env:
+          SOCKS5_PROXY: ${{ secrets.SOCKS5_PROXY }}
+        run: |
+          if [ -n "$SOCKS5_PROXY" ]; then
+            echo "检测到代理配置，启动 Gost 转发..."
+            wget https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
+            gzip -d gost-linux-amd64-2.11.5.gz
+            chmod +x gost-linux-amd64-2.11.5
+            ./gost-linux-amd64-2.11.5 -L=socks5://127.0.0.1:1080 -F=$SOCKS5_PROXY &
+            sleep 3
+          else
+            echo "未设置 SOCKS5_PROXY，跳过代理转发"
+          fi
+
+      - name: 运行登录脚本
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ACCOUNTS_JSON: ${{ secrets.ACCOUNTS_JSON }}
+          SOCKS5_PROXY: ${{ secrets.SOCKS5_PROXY }}
+        run: python login_script.py
 
       - name: 运行登录脚本
         env:
